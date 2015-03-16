@@ -3,7 +3,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
   // TODO add user settings
   var consts = {
-    defaultTitle: "Generic Node"
+    defaultTitle: "Node"
   };
   var settings = {
     appendElSpec: "#graph"
@@ -31,7 +31,8 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       shiftNodeDrag: false,
       selectedText: null
     };
-
+	thisGraph.addEdgeClicked = false;
+	
     // define arrow markers for graph links
     var defs = svg.append('svg:defs');
     defs.append('svg:marker')
@@ -171,6 +172,19 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     d3.select("#delete-graph").on("click", function(){
       thisGraph.deleteGraph(false);
     });
+    
+    d3.select("#add-node").on("click", function(){
+      thisGraph.addNode();
+    });
+    
+    d3.select("#add-edge").on("click", function(){
+      thisGraph.addEdge();
+    });
+    
+    d3.select("#delete").on("click", function(){
+      thisGraph.delSelected();
+    });
+    
   };
 
   GraphCreator.prototype.setIdCt = function(idct){
@@ -214,6 +228,48 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       thisGraph.updateGraph();
     }
   };
+  
+  GraphCreator.prototype.addNode = function(){
+  	var thisGraph = this;
+  	var xycoords = d3.mouse(thisGraph.svgG.node()),
+          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0]-50+Math.floor(Math.random()*150), y: xycoords[1]-100-Math.floor(Math.random()*150), data: {default:"default"}};
+      thisGraph.nodes.push(d);
+      thisGraph.updateGraph();
+      // make title of text immediently editable
+      var d3txt = thisGraph.changeTextOfNode(thisGraph.circles.filter(function(dval){
+        return dval.id === d.id;
+      }), d),
+          txtNode = d3txt.node();
+      thisGraph.selectElementContents(txtNode);
+      txtNode.focus();
+  };
+  
+  GraphCreator.prototype.addEdge = function(){
+  	var thisGraph = this;
+  	if (thisGraph.addEdgeClicked)
+  	  thisGraph.addEdgeClicked = false
+  	else
+  	  thisGraph.addEdgeClicked = true;
+  }
+  
+    GraphCreator.prototype.delSelected = function(){
+  	var thisGraph = this,
+        state = thisGraph.state,
+        consts = thisGraph.consts;
+        var selectedNode = state.selectedNode,
+        selectedEdge = state.selectedEdge;
+  	d3.event.preventDefault();
+      if (selectedNode){
+        thisGraph.nodes.splice(thisGraph.nodes.indexOf(selectedNode), 1);
+        thisGraph.spliceLinksForNode(selectedNode);
+        state.selectedNode = null;
+        thisGraph.updateGraph();
+      } else if (selectedEdge){
+        thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
+        state.selectedEdge = null;
+        thisGraph.updateGraph();
+      }
+  }
 
   /* select all text in element: taken from http://stackoverflow.com/questions/6139107/programatically-select-text-in-a-contenteditable-html-element */
   GraphCreator.prototype.selectElementContents = function(el) {
@@ -263,6 +319,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
   GraphCreator.prototype.replaceSelectNode = function(d3Node, nodeData){
     var thisGraph = this;
+   
     d3Node.classed(this.consts.selectedClass, true);
     if (thisGraph.state.selectedNode){
       thisGraph.removeSelectFromNode();
@@ -319,8 +376,8 @@ document.onload = (function(d3, saveAs, Blob, undefined){
         state = thisGraph.state;
     d3.event.stopPropagation();
     state.mouseDownNode = d;
-    if (d3.event.shiftKey){
-      state.shiftNodeDrag = d3.event.shiftKey;
+    if (d3.event.shiftKey || thisGraph.addEdgeClicked){
+      state.shiftNodeDrag = d3.event.shiftKey || thisGraph.addEdgeClicked;
       // reposition dragged directed edge
       thisGraph.dragLine.classed('hidden', false)
         .attr('d', 'M' + d.x + ',' + d.y + 'L' + d.x + ',' + d.y);
@@ -395,6 +452,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       if (!filtRes[0].length){
         thisGraph.edges.push(newEdge);
         thisGraph.updateGraph();
+        this.addEdgeClicked = false;
       }
     } else{
       // we're in the same node
@@ -443,7 +501,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     } else if (state.graphMouseDown && d3.event.shiftKey){
       // clicked not dragged from svg
       var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0], y: xycoords[1], data: {key: "value"}};
+          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0], y: xycoords[1], data: {default:"default"}};
       thisGraph.nodes.push(d);
       thisGraph.updateGraph();
       // make title of text immediently editable
