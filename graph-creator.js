@@ -19,7 +19,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
     thisGraph.nodes = nodes || [];
     thisGraph.edges = edges || [];
-    
+   
     thisGraph.state = {
       selectedNode: null,
       selectedEdge: null,
@@ -330,14 +330,13 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
   GraphCreator.prototype.removeSelectFromNode = function(){
     var thisGraph = this;
-    
     thisGraph.circles.filter(function(cd){
       return cd.id === thisGraph.state.selectedNode.id;
     }).classed(thisGraph.consts.selectedClass, false);
     for (var i = 0, len = thisGraph.nodes.length; i < len; i++) {
       if(thisGraph.nodes[i].id === thisGraph.state.selectedNode.id) {
       	thisGraph.nodes[i].data = editor.get();
-      	console.log(thisGraph.nodes[i]);
+      	editor.set(null);
       	thisGraph.updateGraph();
       }
   	}
