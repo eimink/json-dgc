@@ -3,19 +3,23 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
   // TODO add user settings
   var consts = {
-    defaultTitle: "random variable"
+    defaultTitle: "Generic Node"
   };
   var settings = {
     appendElSpec: "#graph"
   };
+  
+ 
+  
   // define graphcreator object
   var GraphCreator = function(svg, nodes, edges){
+    
     var thisGraph = this;
         thisGraph.idct = 0;
 
     thisGraph.nodes = nodes || [];
     thisGraph.edges = edges || [];
-
+    
     thisGraph.state = {
       selectedNode: null,
       selectedEdge: null,
@@ -264,13 +268,22 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       thisGraph.removeSelectFromNode();
     }
     thisGraph.state.selectedNode = nodeData;
+    editor.set(nodeData.data);
   };
 
   GraphCreator.prototype.removeSelectFromNode = function(){
     var thisGraph = this;
+    
     thisGraph.circles.filter(function(cd){
       return cd.id === thisGraph.state.selectedNode.id;
     }).classed(thisGraph.consts.selectedClass, false);
+    for (var i = 0, len = thisGraph.nodes.length; i < len; i++) {
+      if(thisGraph.nodes[i].id === thisGraph.state.selectedNode.id) {
+      	thisGraph.nodes[i].data = editor.get();
+      	console.log(thisGraph.nodes[i]);
+      	thisGraph.updateGraph();
+      }
+  	}
     thisGraph.state.selectedNode = null;
   };
 
@@ -430,7 +443,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     } else if (state.graphMouseDown && d3.event.shiftKey){
       // clicked not dragged from svg
       var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0], y: xycoords[1]};
+          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0], y: xycoords[1], data: {key: "value"}};
       thisGraph.nodes.push(d);
       thisGraph.updateGraph();
       // make title of text immediently editable
@@ -461,7 +474,6 @@ document.onload = (function(d3, saveAs, Blob, undefined){
         selectedEdge = state.selectedEdge;
 
     switch(d3.event.keyCode) {
-    case consts.BACKSPACE_KEY:
     case consts.DELETE_KEY:
       d3.event.preventDefault();
       if (selectedNode){
@@ -566,8 +578,9 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
   GraphCreator.prototype.updateWindow = function(svg){
     var docEl = document.documentElement,
-        bodyEl = document.getElementsByTagName('body')[0];
-    var x = window.innerWidth || docEl.clientWidth || bodyEl.clientWidth;
+        bodyEl = document.getElementsByTagName('body')[0],
+      	containerEl = document.getElementById('graph');
+    var x = containerEl.offsetWidth;
     var y = window.innerHeight|| docEl.clientHeight|| bodyEl.clientHeight;
     svg.attr("width", x).attr("height", y);
   };
@@ -582,9 +595,10 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   };
 
   var docEl = document.documentElement,
-      bodyEl = document.getElementsByTagName('body')[0];
+      bodyEl = document.getElementsByTagName('body')[0],
+      containerEl = document.getElementById('graph');
 
-  var width = window.innerWidth || docEl.clientWidth || bodyEl.clientWidth,
+  var width = containerEl.offsetWidth,
       height =  window.innerHeight|| docEl.clientHeight|| bodyEl.clientHeight;
 
   var xLoc = width/2 - 25,
