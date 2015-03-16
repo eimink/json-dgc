@@ -68,10 +68,10 @@ g.conceptG:hover circle{
 }
 
 g.selected circle{
-    fill: rgb(250, 232, 255);
+    fill: #D5DDF6;
 }
 g.selected:hover circle{
-    fill: rgb(250, 232, 255);
+    fill: #D5DDF6;
 }
 
 path.link {
