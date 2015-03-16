@@ -232,7 +232,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   GraphCreator.prototype.addNode = function(){
   	var thisGraph = this;
   	var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0]-50+Math.floor(Math.random()*150), y: xycoords[1]-100-Math.floor(Math.random()*150), data: {default:"default"}};
+          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0]-50+Math.floor(Math.random()*150), y: xycoords[1]-100-Math.floor(Math.random()*150), data: {}};
       thisGraph.nodes.push(d);
       thisGraph.updateGraph();
       // make title of text immediently editable
@@ -500,7 +500,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     } else if (state.graphMouseDown && d3.event.shiftKey){
       // clicked not dragged from svg
       var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0], y: xycoords[1], data: {default:"default"}};
+          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0], y: xycoords[1], data: {}};
       thisGraph.nodes.push(d);
       thisGraph.updateGraph();
       // make title of text immediently editable
