@@ -85,14 +85,34 @@ path.link:hover{
     stroke: rgb(94, 196, 204);
 }
 
-g.connect-node circle{
-    fill: #BEFFFF;
-}
-
 path.link.hidden{
     stroke-width: 0;
 }
 
 path.link.selected {
     stroke: rgb(229, 172, 247);
+}
+
+path.weaklink {
+    fill: none;
+    stroke: #333;
+    stroke-width: 6px;
+    stroke-dasharray: "10,10";
+    cursor: default;
+}
+
+path.weaklink:hover{
+    stroke: rgb(94, 196, 204);
+}
+
+path.weaklink.hidden{
+    stroke-width: 0;
+}
+
+path.weaklink.selected {
+    stroke: rgb(229, 172, 247);
+}
+
+g.connect-node circle{
+    fill: #BEFFFF;
 }
