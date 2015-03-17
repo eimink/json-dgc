@@ -30,9 +30,12 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       justScaleTransGraph: false,
       lastKeyDown: -1,
       shiftNodeDrag: false,
+      altNodeDrag: false,
       selectedText: null
     };
 	thisGraph.addEdgeClicked = false;
+	thisGraph.addWeakEdgeClicked = false;
+	thisGraph.drawWeakEdge = false;
 	
     // define arrow markers for graph links
     var defs = svg.append('svg:defs');
@@ -70,6 +73,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
     // svg nodes and edges
     thisGraph.paths = svgG.append("g").selectAll("g");
+    thisGraph.weakPaths = svgG.append("g").selectAll("g");
     thisGraph.circles = svgG.append("g").selectAll("g");
 
     thisGraph.drag = d3.behavior.drag()
@@ -159,6 +163,12 @@ document.onload = (function(d3, saveAs, Blob, undefined){
                           target: thisGraph.nodes.filter(function(n){return n.id == e.target;})[0]};
             });
             thisGraph.edges = newEdges;
+            var newWeakEdges = jsonObj.weakEdges;
+            newWeakEdges.forEach(function(e, i){
+              newWeakEdges[i] = {source: thisGraph.nodes.filter(function(n){return n.id == e.source;})[0],
+                          target: thisGraph.nodes.filter(function(n){return n.id == e.target;})[0]};
+            });
+            thisGraph.weakEdges = newWeakEdges;
             thisGraph.updateGraph();
           }catch(err){
             window.alert("Error parsing uploaded file\nerror message: " + err.message);
@@ -184,6 +194,9 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     
     d3.select("#add-edge").on("click", function(){
       thisGraph.addEdge();
+    });
+    d3.select("#add-weakedge").on("click", function(){
+      thisGraph.addWeakEdge();
     });
     
     d3.select("#delete").on("click", function(){
@@ -212,7 +225,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
   GraphCreator.prototype.dragmove = function(d) {
     var thisGraph = this;
-    if (thisGraph.state.shiftNodeDrag){
+    if (thisGraph.state.shiftNodeDrag || thisGraph.state.altNodeDrag){
       thisGraph.dragLine.attr('d', 'M' + d.x + ',' + d.y + 'L' + d3.mouse(thisGraph.svgG.node())[0] + ',' + d3.mouse(this.svgG.node())[1]);
     } else{
       d.x += d3.event.dx;
@@ -230,6 +243,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     if(doDelete){
       thisGraph.nodes = [];
       thisGraph.edges = [];
+      thisGraph.weakEdges = [];
       thisGraph.updateGraph();
     }
   };
@@ -257,6 +271,14 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   	  thisGraph.addEdgeClicked = true;
   }
   
+    GraphCreator.prototype.addWeakEdge = function(){
+  	var thisGraph = this;
+  	if (thisGraph.addWeakEdgeClicked)
+  	  thisGraph.addWeakEdgeClicked = false
+  	else
+  	  thisGraph.addWeakEdgeClicked = true;
+  }
+  
     GraphCreator.prototype.delSelected = function(){
   	var thisGraph = this,
         state = thisGraph.state,
@@ -267,10 +289,14 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       if (selectedNode){
         thisGraph.nodes.splice(thisGraph.nodes.indexOf(selectedNode), 1);
         thisGraph.spliceLinksForNode(selectedNode);
+        thisGraph.spliceWeakLinksForNode(selectedNode);
         state.selectedNode = null;
         thisGraph.updateGraph();
       } else if (selectedEdge){
-        thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
+      	if(selectedEdge.type == 1)
+      		thisGraph.weakEdges.splice(thisGraph.weakEdges.indexOf(selectedEdge), 1);
+      	else
+        	thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
         state.selectedEdge = null;
         thisGraph.updateGraph();
       }
@@ -310,6 +336,16 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     });
     toSplice.map(function(l) {
       thisGraph.edges.splice(thisGraph.edges.indexOf(l), 1);
+    });
+  };
+  
+  GraphCreator.prototype.spliceWeakLinksForNode = function(node) {
+    var thisGraph = this,
+        toSplice = thisGraph.weakEdges.filter(function(l) {
+      return (l.source === node || l.target === node);
+    });
+    toSplice.map(function(l) {
+      thisGraph.weakEdges.splice(thisGraph.weakEdges.indexOf(l), 1);
     });
   };
 
@@ -361,13 +397,13 @@ document.onload = (function(d3, saveAs, Blob, undefined){
         state = thisGraph.state;
     d3.event.stopPropagation();
     state.mouseDownLink = d;
-
     if (state.selectedNode){
       thisGraph.removeSelectFromNode();
     }
 
     var prevEdge = state.selectedEdge;
     if (!prevEdge || prevEdge !== d){
+
       thisGraph.replaceSelectEdge(d3path, d);
     } else{
       thisGraph.removeSelectFromEdge();
@@ -381,7 +417,16 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     d3.event.stopPropagation();
     state.mouseDownNode = d;
     if (d3.event.shiftKey || thisGraph.addEdgeClicked){
+    thisGraph.drawWeakEdge = false;
       state.shiftNodeDrag = d3.event.shiftKey || thisGraph.addEdgeClicked;
+      // reposition dragged directed edge
+      thisGraph.dragLine.classed('hidden', false)
+        .attr('d', 'M' + d.x + ',' + d.y + 'L' + d.x + ',' + d.y);
+      return;
+    }
+    else if (d3.event.altKey || thisGraph.addWeakEdgeClicked){
+    	thisGraph.drawWeakEdge = true;
+      state.altNodeDrag = d3.event.altKey || thisGraph.addWeakEdgeClicked;
       // reposition dragged directed edge
       thisGraph.dragLine.classed('hidden', false)
         .attr('d', 'M' + d.x + ',' + d.y + 'L' + d.x + ',' + d.y);
@@ -436,6 +481,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
         consts = thisGraph.consts;
     // reset the states
     state.shiftNodeDrag = false;
+    state.altNodeDrag = false;
     d3node.classed(consts.connectClass, false);
 
     var mouseDownNode = state.mouseDownNode;
@@ -447,6 +493,23 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     if (mouseDownNode !== d){
       // we're in a different node: create new edge for mousedown edge and add to graph
       var newEdge = {source: mouseDownNode, target: d};
+      if (thisGraph.drawWeakEdge) {
+      		newEdge.type=1;
+      	 var filtRes = thisGraph.paths.filter(function(d){
+        if (d.source === newEdge.target && d.target === newEdge.source){
+          thisGraph.edges.splice(thisGraph.weakEdges.indexOf(d), 1);
+        }
+        return d.source === newEdge.source && d.target === newEdge.target;
+      });
+      if (!filtRes[0].length){
+        thisGraph.weakEdges.push(newEdge);
+        thisGraph.updateGraph();
+        this.addWeakEdgeClicked = false;
+      }
+      }
+      else
+      {
+          newEdge.type=0;
       var filtRes = thisGraph.paths.filter(function(d){
         if (d.source === newEdge.target && d.target === newEdge.source){
           thisGraph.edges.splice(thisGraph.edges.indexOf(d), 1);
@@ -457,6 +520,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
         thisGraph.edges.push(newEdge);
         thisGraph.updateGraph();
         this.addEdgeClicked = false;
+      }
       }
     } else{
       // we're in the same node
@@ -515,9 +579,10 @@ document.onload = (function(d3, saveAs, Blob, undefined){
           txtNode = d3txt.node();
       thisGraph.selectElementContents(txtNode);
       txtNode.focus();
-    } else if (state.shiftNodeDrag){
+    } else if (state.shiftNodeDrag || state.altNodeDrag){
       // dragged from node
       state.shiftNodeDrag = false;
+      state.altNodeDrag = false;
       thisGraph.dragLine.classed("hidden", true);
     }
     state.graphMouseDown = false;
@@ -541,10 +606,16 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       if (selectedNode){
         thisGraph.nodes.splice(thisGraph.nodes.indexOf(selectedNode), 1);
         thisGraph.spliceLinksForNode(selectedNode);
+        thisGraph.spliceWeakLinksForNode(selectedNode);
         state.selectedNode = null;
         thisGraph.updateGraph();
       } else if (selectedEdge){
-        thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
+      	console.log(selectedEdge);
+      	if(selectedEdge.type == 1)
+      		thisGraph.weakEdges.splice(thisGraph.weakEdges.indexOf(selectedEdge), 1);
+      	else
+        	thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
+        
         state.selectedEdge = null;
         thisGraph.updateGraph();
       }
@@ -614,7 +685,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     weakPaths.enter()
       .append("path")
       .style('marker-end','url(#end-arrow)')
-      .classed("weakLink", true)
+      .classed("weaklink", true)
       .attr("d", function(d){
         return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
       })
@@ -640,7 +711,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     newGs.classed(consts.circleGClass, true)
       .attr("transform", function(d){return "translate(" + d.x + "," + d.y + ")";})
       .on("mouseover", function(d){
-        if (state.shiftNodeDrag){
+        if (state.shiftNodeDrag || state.altNodeDrag){
           d3.select(this).classed(consts.connectClass, true);
         }
       })

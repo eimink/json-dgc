@@ -97,7 +97,7 @@ path.weaklink {
     fill: none;
     stroke: #333;
     stroke-width: 6px;
-    stroke-dasharray: "10,10";
+    stroke-dasharray: 10,10;
     cursor: default;
 }
 
@@ -110,7 +110,7 @@ path.weaklink.hidden{
 }
 
 path.weaklink.selected {
-    stroke: rgb(229, 172, 247);
+    stroke: rgb(229, 0, 247);
 }
 
 g.connect-node circle{
