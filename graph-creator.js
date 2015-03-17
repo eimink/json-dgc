@@ -12,13 +12,14 @@ document.onload = (function(d3, saveAs, Blob, undefined){
  
   
   // define graphcreator object
-  var GraphCreator = function(svg, nodes, edges){
+  var GraphCreator = function(svg, nodes, edges, weakEdges){
     
     var thisGraph = this;
         thisGraph.idct = 0;
 
     thisGraph.nodes = nodes || [];
     thisGraph.edges = edges || [];
+    thisGraph.weakEdges = weakEdges || [];
    
     thisGraph.state = {
       selectedNode: null,
@@ -123,10 +124,14 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     // handle download data
     d3.select("#download-input").on("click", function(){
       var saveEdges = [];
+      var saveWeakEdges = [];
       thisGraph.edges.forEach(function(val, i){
         saveEdges.push({source: val.source.id, target: val.target.id});
       });
-      var blob = new Blob([window.JSON.stringify({"nodes": thisGraph.nodes, "edges": saveEdges})], {type: "text/plain;charset=utf-8"});
+      thisGraph.weakEdges.forEach(function(val, i){
+        saveWeakEdges.push({source: val.source.id, target: val.target.id});
+      });
+      var blob = new Blob([window.JSON.stringify({"nodes": thisGraph.nodes, "edges": saveEdges, "weakEdges": saveWeakEdges})], {type: "text/plain;charset=utf-8"});
       saveAs(blob, "mydag.json");
     });
 
@@ -561,6 +566,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     thisGraph.paths = thisGraph.paths.data(thisGraph.edges, function(d){
       return String(d.source.id) + "+" + String(d.target.id);
     });
+
     var paths = thisGraph.paths;
     // update existing paths
     paths.style('marker-end', 'url(#end-arrow)')
@@ -589,6 +595,39 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
     // remove old links
     paths.exit().remove();
+
+    thisGraph.weakPaths = thisGraph.weakPaths.data(thisGraph.weakEdges, function(d){
+      return String(d.source.id) + "+" + String(d.target.id);
+    });
+
+    var weakPaths = thisGraph.weakPaths;
+    // update existing paths
+    weakPaths.style('marker-end', 'url(#end-arrow)')
+      .classed(consts.selectedClass, function(d){
+        return d === state.selectedEdge;
+      })
+      .attr("d", function(d){
+        return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
+      });
+
+    // add new paths
+    weakPaths.enter()
+      .append("path")
+      .style('marker-end','url(#end-arrow)')
+      .classed("weakLink", true)
+      .attr("d", function(d){
+        return "M" + d.source.x + "," + d.source.y + "L" + d.target.x + "," + d.target.y;
+      })
+      .on("mousedown", function(d){
+        thisGraph.pathMouseDown.call(thisGraph, d3.select(this), d);
+        }
+      )
+      .on("mouseup", function(d){
+        state.mouseDownLink = null;
+      });
+
+    // remove old links
+    weakPaths.exit().remove();
 
     // update existing nodes
     thisGraph.circles = thisGraph.circles.data(thisGraph.nodes, function(d){ return d.id;});
@@ -664,13 +703,14 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   // initial node data
   var nodes = [];
   var edges = [];
+  var weakEdges = [];
 
 
   /** MAIN SVG **/
   var svg = d3.select(settings.appendElSpec).append("svg")
         .attr("width", width)
         .attr("height", height);
-  var graph = new GraphCreator(svg, nodes, edges);
+  var graph = new GraphCreator(svg, nodes, edges, weakEdges);
       graph.setIdCt(2);
   graph.updateGraph();
 })(window.d3, window.saveAs, window.Blob);
