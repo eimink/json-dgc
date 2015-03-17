@@ -250,8 +250,28 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   
   GraphCreator.prototype.addNode = function(){
   	var thisGraph = this;
+  	thisGraph.addTypedNode("generic");
+  };
+  
+  GraphCreator.prototype.addStartNode = function(){
+  	var thisGraph = this;
+  	thisGraph.addTypedNode("start");
+  };
+  
+  GraphCreator.prototype.addSubStartNode = function(){
+  	var thisGraph = this;
+  	thisGraph.addTypedNode("substart");
+  };
+  
+  GraphCreator.prototype.addBlockNode = function(){
+  	var thisGraph = this;
+  	thisGraph.addTypedNode("block");
+  };
+  
+  GraphCreator.prototype.addTypedNode = function(nodeType){
+  	var thisGraph = this;
   	var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0]-50+Math.floor(Math.random()*150), y: xycoords[1]-100-Math.floor(Math.random()*150), data: {}};
+          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0]-50+Math.floor(Math.random()*150), y: xycoords[1]-100-Math.floor(Math.random()*150), data: {type:nodeType}};
       thisGraph.nodes.push(d);
       thisGraph.updateGraph();
       // make title of text immediently editable
@@ -569,7 +589,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     } else if (state.graphMouseDown && d3.event.shiftKey){
       // clicked not dragged from svg
       var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0], y: xycoords[1], data: {}};
+          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0], y: xycoords[1], data: {type:"generic"}};
       thisGraph.nodes.push(d);
       thisGraph.updateGraph();
       // make title of text immediently editable
