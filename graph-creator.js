@@ -192,6 +192,18 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       thisGraph.addNode();
     });
     
+    d3.select("#add-startnode").on("click", function(){
+      thisGraph.addStartNode();
+    });
+    
+    d3.select("#add-substartnode").on("click", function(){
+      thisGraph.addSubStartNode();
+    });
+    
+    d3.select("#add-blocknode").on("click", function(){
+      thisGraph.addBlockNode();
+    });
+    
     d3.select("#add-edge").on("click", function(){
       thisGraph.addEdge();
     });
@@ -725,6 +737,8 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     thisGraph.circles.attr("transform", function(d){return "translate(" + d.x + "," + d.y + ")";});
 
     // add new nodes
+    if(thisGraph.nodes.length > 0)
+    {
     var newGs= thisGraph.circles.enter()
           .append("g");
 
@@ -749,10 +763,30 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     newGs.append("circle")
       .attr("r", String(consts.nodeRadius));
 
+	newGs.each(function(d){
+	console.log(d3.selectAll("circle").filter(function(dval){return dval.id === d.id;}));
+		var circleselect = d3.selectAll("circle").filter(function(dval){return dval.id === d.id;});
+		if(d.data.type=="block") {
+			circleselect.style("stroke","OrangeRed");
+			circleselect.style("stroke-width","6px");
+			circleselect.style("stroke-dasharray","7,1");
+		}
+		if(d.data.type=="start") {
+			circleselect.style("stroke","SeaGreen");
+			circleselect.style("stroke-width","6px");
+			circleselect.style("stroke-dasharray","7,1");
+		}
+		if(d.data.type=="substart") {
+			circleselect.style("stroke","SteelBlue");
+			circleselect.style("stroke-width","3px");
+			circleselect.style("stroke-dasharray","7,1");
+		}
+	});
+
     newGs.each(function(d){
       thisGraph.insertTitleLinebreaks(d3.select(this), d.title);
     });
-
+	}
     // remove old nodes
     thisGraph.circles.exit().remove();
   };
