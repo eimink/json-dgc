@@ -207,6 +207,14 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       thisGraph.addBlockNode();
     });
     
+    d3.select("#add-stacknode").on("click", function(){
+      thisGraph.addStackNode();
+    });
+    
+    d3.select("#duplicate-node").on("click", function(){
+      thisGraph.duplicateNode();
+    });
+    
     d3.select("#add-edge").on("click", function(){
       thisGraph.addEdge();
     });
@@ -283,10 +291,20 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   	thisGraph.addTypedNode("block");
   };
   
+  GraphCreator.prototype.addStackNode = function(){
+  	var thisGraph = this;
+  	thisGraph.addTypedNode("stack");
+  };
+ 
   GraphCreator.prototype.addTypedNode = function(nodeType){
   	var thisGraph = this;
+  	var nodeData = "";
+  	if(nodeType == "stack")
+  		nodeData = {type:nodeType,count:3};
+  	else
+  		nodeData = {type:nodeType};
   	var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0]-50+Math.floor(Math.random()*150), y: xycoords[1]-100-Math.floor(Math.random()*150), data: {type:nodeType}};
+          d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0]-50+Math.floor(Math.random()*150), y: xycoords[1]-100-Math.floor(Math.random()*150), data: nodeData};
       thisGraph.nodes.push(d);
       thisGraph.updateGraph();
       // make title of text immediently editable
@@ -296,6 +314,21 @@ document.onload = (function(d3, saveAs, Blob, undefined){
           txtNode = d3txt.node();
       thisGraph.selectElementContents(txtNode);
       txtNode.focus();
+  };
+  
+    GraphCreator.prototype.duplicateNode = function(){
+  	var thisGraph = this,
+        state = thisGraph.state,
+        consts = thisGraph.consts;
+	var selectedNode = state.selectedNode;
+    d3.event.preventDefault();
+    if (selectedNode)
+    {
+    	console.log(selectedNode);
+    	var d = {id: thisGraph.idct++, title: selectedNode.title, x: selectedNode.x+20+Math.floor(Math.random()*80), y: selectedNode.y-20-Math.floor(Math.random()*80), data: selectedNode.data};
+    	thisGraph.nodes.push(d);
+      	thisGraph.updateGraph();
+    }
   };
   
   GraphCreator.prototype.addEdge = function(){
@@ -783,6 +816,11 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 			circleselect.style("stroke-width","3px");
 			circleselect.style("stroke-dasharray","7,1");
 		}
+		if(d.data.type=="stack") {
+			circleselect.style("stroke","SlateGray");
+			circleselect.style("stroke-width","6px");
+		}
+		
 	});
 
     newGs.each(function(d){
