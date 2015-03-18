@@ -285,7 +285,6 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   
   GraphCreator.prototype.addTypedNode = function(nodeType){
   	var thisGraph = this;
-  	console.log(thisGraph.idct);
   	var xycoords = d3.mouse(thisGraph.svgG.node()),
           d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0]-50+Math.floor(Math.random()*150), y: xycoords[1]-100-Math.floor(Math.random()*150), data: {type:nodeType}};
       thisGraph.nodes.push(d);
