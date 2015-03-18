@@ -163,12 +163,15 @@ document.onload = (function(d3, saveAs, Blob, undefined){
                           target: thisGraph.nodes.filter(function(n){return n.id == e.target;})[0]};
             });
             thisGraph.edges = newEdges;
+            if(typeof jsonObj.weakEdges !== "undefined")
+            {
             var newWeakEdges = jsonObj.weakEdges;
             newWeakEdges.forEach(function(e, i){
               newWeakEdges[i] = {source: thisGraph.nodes.filter(function(n){return n.id == e.source;})[0],
                           target: thisGraph.nodes.filter(function(n){return n.id == e.target;})[0]};
             });
             thisGraph.weakEdges = newWeakEdges;
+            }
             thisGraph.updateGraph();
           }catch(err){
             window.alert("Error parsing uploaded file\nerror message: " + err.message);
