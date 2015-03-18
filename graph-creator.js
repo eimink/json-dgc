@@ -156,7 +156,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
             var jsonObj = JSON.parse(txtRes);
             thisGraph.deleteGraph(true);
             thisGraph.nodes = jsonObj.nodes;
-            thisGraph.setIdCt(jsonObj.nodes.length + 1);
+            thisGraph.setIdCt(jsonObj.nodes[jsonObj.nodes.length-1].id + 1);
             var newEdges = jsonObj.edges;
             newEdges.forEach(function(e, i){
               newEdges[i] = {source: thisGraph.nodes.filter(function(n){return n.id == e.source;})[0],
@@ -285,6 +285,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   
   GraphCreator.prototype.addTypedNode = function(nodeType){
   	var thisGraph = this;
+  	console.log(thisGraph.idct);
   	var xycoords = d3.mouse(thisGraph.svgG.node()),
           d = {id: thisGraph.idct++, title: consts.defaultTitle, x: xycoords[0]-50+Math.floor(Math.random()*150), y: xycoords[1]-100-Math.floor(Math.random()*150), data: {type:nodeType}};
       thisGraph.nodes.push(d);
@@ -767,7 +768,6 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       .attr("r", String(consts.nodeRadius));
 
 	newGs.each(function(d){
-	console.log(d3.selectAll("circle").filter(function(dval){return dval.id === d.id;}));
 		var circleselect = d3.selectAll("circle").filter(function(dval){return dval.id === d.id;});
 		if(d.data.type=="block") {
 			circleselect.style("stroke","OrangeRed");
