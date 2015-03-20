@@ -771,7 +771,33 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     // update existing nodes
     thisGraph.circles = thisGraph.circles.data(thisGraph.nodes, function(d){ return d.id;});
     thisGraph.circles.attr("transform", function(d){return "translate(" + d.x + "," + d.y + ")";});
-
+	thisGraph.circles.each(function(d){
+		var circleselect = d3.selectAll("circle").filter(function(dval){return dval.id === d.id;});
+		if(d.data.type=="block") {
+			circleselect.style("stroke","OrangeRed");
+			circleselect.style("stroke-width","6px");
+			circleselect.style("stroke-dasharray","7,1");
+		}
+		if(d.data.type=="start") {
+			circleselect.style("stroke","SeaGreen");
+			circleselect.style("stroke-width","6px");
+			circleselect.style("stroke-dasharray","7,1");
+		}
+		if(d.data.type=="substart") {
+			circleselect.style("stroke","SteelBlue");
+			circleselect.style("stroke-width","3px");
+			circleselect.style("stroke-dasharray","7,1");
+		}
+		if(d.data.type=="stack") {
+			circleselect.style("stroke","SlateGray");
+			circleselect.style("stroke-width","6px");
+		}
+		if(d.data.type=="reward") {
+			circleselect.style("stroke","GoldenRod");
+			circleselect.style("stroke-width","6px");
+		}
+		
+	});
     // add new nodes
     if(thisGraph.nodes.length > 0)
     {
