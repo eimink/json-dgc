@@ -820,6 +820,10 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 			circleselect.style("stroke","SlateGray");
 			circleselect.style("stroke-width","6px");
 		}
+		if(d.data.type=="reward") {
+			circleselect.style("stroke","GoldenRod");
+			circleselect.style("stroke-width","6px");
+		}
 		
 	});
 
