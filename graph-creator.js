@@ -149,8 +149,8 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     	}
     	startnodes.forEach(function(val,i){
     		var path = [];
-    		var target = val;
-    		var prevTarget = null;
+    		var target = thisGraph.traverseEdge(val);
+    		var prevTarget = val;
     		do {
     			if (typeof target.data.link != "undefined") {
     				path[path.length-1].link = "weak";
@@ -161,7 +161,9 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     			target = thisGraph.traverseEdge(prevTarget);
     		}
     		while (target != null);
-    		savePaths.push({type: val.data.type, nodes: path})
+    		var d = val.data;
+    		d.nodes = path;
+    		savePaths.push(d);
     	});
     	var blob = new Blob([window.JSON.stringify({"paths": savePaths})], {type: "text/plain;charset=utf-8"});
       	saveAs(blob, "mypaths.json");
