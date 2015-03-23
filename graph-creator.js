@@ -138,6 +138,34 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       var blob = new Blob([window.JSON.stringify({"nodes": thisGraph.nodes, "edges": saveEdges, "weakEdges": saveWeakEdges})], {type: "text/plain;charset=utf-8"});
       saveAs(blob, "mydag.json");
     });
+    
+    d3.select("#download-format").on("click", function(){
+    	var savePaths = [];
+    	var startnodes = [];
+    	for (var i = 0; i < thisGraph.nodes.length; i++) {
+    	  if (thisGraph.nodes[i].data.type == "start" || thisGraph.nodes[i].data.type == "substart") {
+    	  	startnodes.push(thisGraph.nodes[i]);
+    	  }
+    	}
+    	startnodes.forEach(function(val,i){
+    		var path = [];
+    		var target = val;
+    		var prevTarget = null;
+    		do {
+    			if (typeof target.data.link != "undefined") {
+    				path[path.length-1].link = "weak";
+    				delete target.data.link;
+    			}
+    			path.push(target.data);
+    			prevTarget = target;
+    			target = thisGraph.traverseEdge(prevTarget);
+    		}
+    		while (target != null);
+    		savePaths.push({type: val.data.type, nodes: path})
+    	});
+    	var blob = new Blob([window.JSON.stringify({"paths": savePaths})], {type: "text/plain;charset=utf-8"});
+      	saveAs(blob, "mypaths.json");
+    });
 
 
     // handle uploaded data
@@ -227,6 +255,38 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     });
     
   };
+
+  GraphCreator.prototype.traverseEdge = function(node){
+  	var thisGraph = this;
+  	for (var i = 0; i < thisGraph.edges.length; i++)
+  	{ 
+  		if(thisGraph.edges[i].source.id == node.id)
+  		{
+  			for (var j = 0; j < thisGraph.nodes.length; j++)
+  			{
+  				if (thisGraph.nodes[j].id == thisGraph.edges[i].target.id)
+  				{
+  					return thisGraph.nodes[j];
+  				}
+  			}
+  		}
+  	}
+  	for (var i = 0; i < thisGraph.weakEdges.length; i++)
+  	{ 
+  		if(thisGraph.weakEdges[i].source.id == node.id)
+  		{
+  			for (var j = 0; j < thisGraph.nodes.length; j++)
+  			{
+  				if (thisGraph.nodes[j].id == thisGraph.weakEdges[i].target.id)
+  				{
+  					thisGraph.nodes[j].data.link = "weak";
+  					return thisGraph.nodes[j];
+  				}
+  			}
+  		}
+  	}
+  	return null;
+  }
 
   GraphCreator.prototype.setIdCt = function(idct){
     this.idct = idct;
