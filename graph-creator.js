@@ -281,8 +281,9 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   			{
   				if (thisGraph.nodes[j].id == thisGraph.weakEdges[i].target.id)
   				{
-  					thisGraph.nodes[j].data.link = "weak";
-  					return thisGraph.nodes[j];
+  					var node = thisGraph.nodes[j];
+  					node.data.link = "weak";
+  					return node;
   				}
   			}
   		}
