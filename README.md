@@ -18,8 +18,8 @@ Operation:
 
 To run Vagrant box:
 
-cd ./vagrant
-vagrant up
+* cd ./vagrant
+* vagrant up
 * navigate to http://127.0.0.1:8000
 
 Run source:
