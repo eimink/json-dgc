@@ -7,5 +7,5 @@ source ~/.profile
 nvm install 0.10.13
 cd /var/jsondgc && npm install jsoneditor
 sleep 2s
-cd /var/jsondgc && python -m SimpleHTTPServer 8000 > output
+cd /var/jsondgc && python -m SimpleHTTPServer 8000 > output &
 echo $ip
