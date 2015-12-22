@@ -16,13 +16,7 @@ Operation:
 * click on node or edge and press backspace/delete to delete
 * use editor on right-hand side to enter custom data to nodes, switching selection saves data to node
 
-To run Vagrant box:
-
-* cd ./vagrant
-* vagrant up
-* navigate to http://127.0.0.1:8000
-
-Run source:
+Run:
 
 * npm install jsoneditor
 * `python -m SimpleHTTPServer 8000`
@@ -31,3 +25,10 @@ Run source:
 Github repo is at https://github.com/eimink/json-dgc/
 
 License: MIT/X
+
+
+
+
+
+
+
