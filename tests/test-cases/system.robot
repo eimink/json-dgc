@@ -7,11 +7,8 @@ Test Teardown    Close Browser
 
 *** Test Cases ***
 Test Clicks
-  Click Menu    add-stacknode
-  Click Menu    add-blocknode
-  Click Menu    add-substartnode
-  Click Menu    add-startnode
-  Click Menu    add-node
-  Click Menu    add-edge
-  Click Menu    add-weakedge
-  Click Menu    delete
+  Click Menu    add-stacknode        stack
+  Click Menu    add-blocknode        block
+  Click Menu    add-substartnode     substart
+  Click Menu    add-startnode        start
+  Click Menu    add-node             generic
