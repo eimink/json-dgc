@@ -8,19 +8,19 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   var settings = {
     appendElSpec: "#graph"
   };
-  
- 
-  
+
+
+
   // define graphcreator object
   var GraphCreator = function(svg, nodes, edges, weakEdges){
-    
+
     var thisGraph = this;
         thisGraph.idct = 0;
 
     thisGraph.nodes = nodes || [];
     thisGraph.edges = edges || [];
     thisGraph.weakEdges = weakEdges || [];
-   
+
     thisGraph.state = {
       selectedNode: null,
       selectedEdge: null,
@@ -36,7 +36,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 	thisGraph.addEdgeClicked = false;
 	thisGraph.addWeakEdgeClicked = false;
 	thisGraph.drawWeakEdge = false;
-	
+
     // define arrow markers for graph links
     var defs = svg.append('svg:defs');
     defs.append('svg:marker')
@@ -138,7 +138,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       var blob = new Blob([window.JSON.stringify({"nodes": thisGraph.nodes, "edges": saveEdges, "weakEdges": saveWeakEdges})], {type: "text/plain;charset=utf-8"});
       saveAs(blob, "mydag.json");
     });
-    
+
     d3.select("#download-format").on("click", function(){
     	var savePaths = [];
     	var startnodes = [];
@@ -220,48 +220,48 @@ document.onload = (function(d3, saveAs, Blob, undefined){
     d3.select("#delete-graph").on("click", function(){
       thisGraph.deleteGraph(false);
     });
-    
+
     d3.select("#add-node").on("click", function(){
       thisGraph.addNode();
     });
-    
+
     d3.select("#add-startnode").on("click", function(){
       thisGraph.addStartNode();
     });
-    
+
     d3.select("#add-substartnode").on("click", function(){
       thisGraph.addSubStartNode();
     });
-    
+
     d3.select("#add-blocknode").on("click", function(){
       thisGraph.addBlockNode();
     });
-    
+
     d3.select("#add-stacknode").on("click", function(){
       thisGraph.addStackNode();
     });
-    
+
     d3.select("#duplicate-node").on("click", function(){
       thisGraph.duplicateNode();
     });
-    
+
     d3.select("#add-edge").on("click", function(){
       thisGraph.addEdge();
     });
     d3.select("#add-weakedge").on("click", function(){
       thisGraph.addWeakEdge();
     });
-    
+
     d3.select("#delete").on("click", function(){
       thisGraph.delSelected();
     });
-    
+
   };
 
   GraphCreator.prototype.traverseEdge = function(node){
   	var thisGraph = this;
   	for (var i = 0; i < thisGraph.edges.length; i++)
-  	{ 
+  	{
   		if(thisGraph.edges[i].source.id == node.id)
   		{
   			for (var j = 0; j < thisGraph.nodes.length; j++)
@@ -274,7 +274,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   		}
   	}
   	for (var i = 0; i < thisGraph.weakEdges.length; i++)
-  	{ 
+  	{
   		if(thisGraph.weakEdges[i].source.id == node.id)
   		{
   			for (var j = 0; j < thisGraph.nodes.length; j++)
@@ -333,32 +333,32 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       thisGraph.updateGraph();
     }
   };
-  
+
   GraphCreator.prototype.addNode = function(){
   	var thisGraph = this;
   	thisGraph.addTypedNode("generic");
   };
-  
+
   GraphCreator.prototype.addStartNode = function(){
   	var thisGraph = this;
   	thisGraph.addTypedNode("start");
   };
-  
+
   GraphCreator.prototype.addSubStartNode = function(){
   	var thisGraph = this;
   	thisGraph.addTypedNode("substart");
   };
-  
+
   GraphCreator.prototype.addBlockNode = function(){
   	var thisGraph = this;
   	thisGraph.addTypedNode("block");
   };
-  
+
   GraphCreator.prototype.addStackNode = function(){
   	var thisGraph = this;
   	thisGraph.addTypedNode("stack");
   };
- 
+
   GraphCreator.prototype.addTypedNode = function(nodeType){
   	var thisGraph = this;
   	var nodeData = "";
@@ -378,7 +378,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       thisGraph.selectElementContents(txtNode);
       txtNode.focus();
   };
-  
+
     GraphCreator.prototype.duplicateNode = function(){
   	var thisGraph = this,
         state = thisGraph.state,
@@ -393,7 +393,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       	thisGraph.updateGraph();
     }
   };
-  
+
   GraphCreator.prototype.addEdge = function(){
   	var thisGraph = this;
   	if (thisGraph.addEdgeClicked)
@@ -401,7 +401,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   	else
   	  thisGraph.addEdgeClicked = true;
   }
-  
+
     GraphCreator.prototype.addWeakEdge = function(){
   	var thisGraph = this;
   	if (thisGraph.addWeakEdgeClicked)
@@ -409,7 +409,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
   	else
   	  thisGraph.addWeakEdgeClicked = true;
   }
-  
+
     GraphCreator.prototype.delSelected = function(){
   	var thisGraph = this,
         state = thisGraph.state,
@@ -469,7 +469,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       thisGraph.edges.splice(thisGraph.edges.indexOf(l), 1);
     });
   };
-  
+
   GraphCreator.prototype.spliceWeakLinksForNode = function(node) {
     var thisGraph = this,
         toSplice = thisGraph.weakEdges.filter(function(l) {
@@ -491,7 +491,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 
   GraphCreator.prototype.replaceSelectNode = function(d3Node, nodeData){
     var thisGraph = this;
-   
+
     d3Node.classed(this.consts.selectedClass, true);
     if (thisGraph.state.selectedNode){
       thisGraph.removeSelectFromNode();
@@ -746,7 +746,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
       		thisGraph.weakEdges.splice(thisGraph.weakEdges.indexOf(selectedEdge), 1);
       	else
         	thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
-        
+
         state.selectedEdge = null;
         thisGraph.updateGraph();
       }
@@ -859,7 +859,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 			circleselect.style("stroke","GoldenRod");
 			circleselect.style("stroke-width","6px");
 		}
-		
+
 	});
     // add new nodes
     if(thisGraph.nodes.length > 0)
@@ -884,12 +884,12 @@ document.onload = (function(d3, saveAs, Blob, undefined){
         thisGraph.circleMouseUp.call(thisGraph, d3.select(this), d);
       })
       .call(thisGraph.drag);
-
     newGs.append("circle")
       .attr("r", String(consts.nodeRadius));
 
 	newGs.each(function(d){
 		var circleselect = d3.selectAll("circle").filter(function(dval){return dval.id === d.id;});
+    circleselect.attr("name", d.data.type);
 		if(d.data.type=="block") {
 			circleselect.style("stroke","OrangeRed");
 			circleselect.style("stroke-width","6px");
@@ -913,7 +913,7 @@ document.onload = (function(d3, saveAs, Blob, undefined){
 			circleselect.style("stroke","GoldenRod");
 			circleselect.style("stroke-width","6px");
 		}
-		
+
 	});
 
     newGs.each(function(d){
